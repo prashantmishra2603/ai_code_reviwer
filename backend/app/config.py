@@ -28,8 +28,9 @@ class Settings(BaseSettings):
     # GitHub
     github_token: str = ""
     
-    # ChromaDB
-    chroma_db_path: str = "./vector_db"
+    # Qdrant
+    qdrant_url: str = ""
+    qdrant_api_key: str = ""
     
     # CORS
     cors_origins: List[str] = ["http://localhost:5173", "http://localhost:3000"]

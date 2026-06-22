@@ -12,7 +12,6 @@ import os
 
 # Create uploads directory if it doesn't exist
 os.makedirs(settings.upload_dir, exist_ok=True)
-os.makedirs(settings.chroma_db_path, exist_ok=True)
 
 
 @asynccontextmanager
