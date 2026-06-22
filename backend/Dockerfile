@@ -1,29 +1,31 @@
-# Backend Dockerfile — Production Ready
 FROM python:3.11-slim
 
 WORKDIR /app
 
 # System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc curl && \
-    rm -rf /var/lib/apt/lists/*
+  gcc curl && \
+  rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+  pip install --no-cache-dir -r requirements.txt
 
-# Copy application code ONLY (no .env — use env vars instead)
-COPY app/ ./app/
+# Copy full backend (IMPORTANT)
+COPY . .
 
-# Create directories
+# Create folders
 RUN mkdir -p uploads vector_db
 
-# Expose port
-EXPOSE 8000
+# Render port fix
+ENV PORT=10000
 
-# Health check
+EXPOSE 10000
+
+# Health check (optional but safe)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
+  CMD curl -f http://localhost:10000/health || exit 1
 
-# Run application (PORT from env var for Render compatibility)
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Start command
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 10000"]
