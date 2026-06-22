@@ -28,4 +28,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:10000/health || exit 1
 
 # Start command
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 10000"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port $PORT"]
