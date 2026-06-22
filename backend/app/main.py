@@ -55,9 +55,9 @@ app.include_router(chat.router)
 app.include_router(history.router)
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
-    """Root endpoint"""
+    """Root endpoint — supports HEAD for Render port scanner"""
     return {
         "message": "🤖 AI Code Reviewer API",
         "version": settings.api_version,
@@ -66,9 +66,9 @@ async def root():
     }
 
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
-    """Health check endpoint"""
+    """Health check endpoint — supports HEAD for Render port scanner"""
     return {
         "status": "healthy",
         "service": "AI Code Reviewer"
