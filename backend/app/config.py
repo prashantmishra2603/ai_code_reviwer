@@ -35,11 +35,11 @@ class Settings(BaseSettings):
     qdrant_api_key: str = ""
     
     # CORS — always includes the Vercel frontend by default
-    cors_origins: List[str] = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://ai-code-reviwer-lemon.vercel.app",
-    ]
+   cors_origins: List[str] = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://ai-code-reviewer-lemon.vercel.app",
+]
     
     @field_validator("cors_origins", mode="before")
     @classmethod
