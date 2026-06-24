@@ -3,7 +3,9 @@ Application configuration and settings
 """
 
 from pydantic_settings import BaseSettings
-from typing import List
+from pydantic import field_validator
+from typing import List, Union
+import json
 
 
 class Settings(BaseSettings):
@@ -32,8 +34,44 @@ class Settings(BaseSettings):
     qdrant_url: str = ""
     qdrant_api_key: str = ""
     
-    # CORS
-    cors_origins: List[str] = ["http://localhost:5173", "http://localhost:3000"]
+    # CORS — always includes the Vercel frontend by default
+    cors_origins: List[str] = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://ai-code-reviwer-lemon.vercel.app",
+    ]
+    
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        """
+        Accept CORS_ORIGINS as:
+          - a Python/JSON list:  ["url1", "url2"]
+          - a comma-separated string: url1,url2
+          - a single URL string: url1
+        Always ensure the Vercel frontend is included.
+        """
+        vercel_url = "https://ai-code-reviwer-lemon.vercel.app"
+        
+        if isinstance(v, list):
+            origins = v
+        elif isinstance(v, str):
+            v = v.strip()
+            if v.startswith("["):
+                try:
+                    origins = json.loads(v)
+                except json.JSONDecodeError:
+                    origins = [o.strip().strip('"').strip("'") for o in v.strip("[]").split(",")]
+            else:
+                origins = [o.strip() for o in v.split(",") if o.strip()]
+        else:
+            origins = []
+        
+        # Always include the deployed frontend
+        if vercel_url not in origins:
+            origins.append(vercel_url)
+        
+        return origins
     
     # Upload
     max_upload_size: int = 52428800  # 50MB
@@ -51,3 +89,4 @@ class Settings(BaseSettings):
 
 # Initialize settings
 settings = Settings()
+
