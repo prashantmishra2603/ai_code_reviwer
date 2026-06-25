@@ -2,13 +2,19 @@
 Main FastAPI application
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from app.config import settings
 from app.database.db import init_db
 from app.routers import auth, review, chat, history
 import os
+import traceback
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Create uploads directory if it doesn't exist
 os.makedirs(settings.upload_dir, exist_ok=True)
@@ -76,6 +82,26 @@ app.include_router(auth.router)
 app.include_router(review.router)
 app.include_router(chat.router)
 app.include_router(history.router)
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    Global exception handler — logs full traceback and returns JSON with CORS headers.
+    This ensures browser gets the real error instead of a CORS block on 500s.
+    """
+    error_detail = traceback.format_exc()
+    logger.error(f"Unhandled exception on {request.method} {request.url}:\n{error_detail}")
+    origin = request.headers.get("origin", "")
+    headers = {}
+    if origin in CORS_ORIGINS:
+        headers["Access-Control-Allow-Origin"] = origin
+        headers["Access-Control-Allow-Credentials"] = "true"
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc), "type": type(exc).__name__},
+        headers=headers,
+    )
 
 
 @app.api_route("/", methods=["GET", "HEAD"])
